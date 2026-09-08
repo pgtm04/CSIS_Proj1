@@ -8,8 +8,13 @@ message_history = []
 port = 54321
 @app.route('/', methods=['GET'])
 def home():
+    return render_template('index.html', message_history=message_history)
+
+@socketio.on('connect')
+def handle_connect():
     try:
         s = socket.socket()
+        s.settimeout(1.0)
         s.connect(('127.0.0.1', port))
 
         data_from = s.recv(1024)
@@ -17,8 +22,9 @@ def home():
         s.close()
     except Exception as e:
         res = f"Could not connect to server: {e}"
-    message_history.append(res)
-    return render_template('index.html', message_history=message_history)
+    if res not in message_history:
+        message_history.append(res)
+        emit('new message', {'message': res}, broadcast=True)
 
 
 if __name__ == '__main__':
