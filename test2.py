@@ -8,7 +8,7 @@ print ("Socket successfully created")
 
 port = 54321
 
-s.bind(('', port))
+s.bind(('10.195.65.122', port))
 print ("socket binded to %s" %(port))
 
 s.listen(5)
@@ -24,4 +24,4 @@ def home():
     return render_template('index.html')
 
 if __name__ == '__main__':
-    app.run(port=5001, debug=True, use_reloader=False)
+    app.run(host='0.0.0.0', port=5001, debug=True, use_reloader=False)

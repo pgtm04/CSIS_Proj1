@@ -6,7 +6,7 @@
 </head>
 <body>
     <h1>Hello!</h1>
-    <form action="/" method="POST">
+    <form id="chatForm">
         <label for="message">Message:</label>
         <input type="text" id="message" name="message" required>
 
@@ -24,7 +24,14 @@
     <script src = "https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script>
         const socket = io();
-        socket.on('new_message', function(data){
+        document.getElementById('chatForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const input = document.getElementById('message');
+
+            socket.emit('client_message', { message: input.value });
+            input.value = '';
+        });
+        socket.on('server_response', function(data){
             const container = document.getElementById('message-container');
             const newP = document.createElement('p');
             newP.textContent = data.message;

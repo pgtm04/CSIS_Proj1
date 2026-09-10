@@ -2,40 +2,32 @@ import socket
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit
 
-
 app = Flask(__name__)
-socketio = SocketIO(app, async_mode='threading')
+socketio = SocketIO(app, async_mode='threading', cors_allowed_origins="*")
 message_history = []
-port = 54321
-@app.route('/', methods=['GET'])
+
+user_map = {}
+user_counter = 0
+
+@app.route('/')
 def home():
     return render_template('index.html', message_history=message_history)
 
-def read_tcp_stream():
-    s = socket.socket()
-    try:
-        s.connect(('127.0.0.1', port))
-    except Exception as e:
-        print(f"Could not connect to backend server: {e}")
-        return
-    while True:
-        try:
-            data_from = s.recv(1024)
-            if not data_from:
-                break
-            res = data_from.decode().strip()
-            if res and res not in message_history:
-                message_history.append(res)
-                # Pushes the message to the UI instantly
-                socketio.emit('new_message', {'message': res})
-        except Exception as e:
-            print(f"Error reading socket: {e}")
-            break
-
 @socketio.on('connect')
 def handle_connect():
-    socketio.start_background_task(read_tcp_stream)
+    global user_counter
+    if request.sid not in user_map:
+        user_counter += 1
+        user_map[request.sid] = f"User {user_counter}"
 
+@socketio.on('client_message')
+def handle_client_message(data):
+     msg = data.get('message')
+     if msg:
+         sender_name = user_map.get(request.sid, "Anonymous")
+         form_msg =f"{sender_name}: {msg}"
+         message_history.append(form_msg)
+         emit('server_response', {'message': form_msg}, broadcast=True)
 
 if __name__ == '__main__':
-    socketio.run(app, port=5000, debug=True, allow_unsafe_werkzeug=True)
+    socketio.run(app,host='0.0.0.0', port=5000, debug=True, allow_unsafe_werkzeug=True)
