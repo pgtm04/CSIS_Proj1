@@ -3,18 +3,23 @@ from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit
 
 app = Flask(__name__)
-socketio = SocketIO(app, async_mode='threading', cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins=["*"])
 message_history = []
 
 user_map = {}
 user_counter = 0
 
 @app.route('/')
-def home():
+def welcome():
+    return render_template('welcome.html')
+
+@app.route('/index.html')
+def index():
     return render_template('index.html', message_history=message_history)
 
 @socketio.on('connect')
 def handle_connect():
+
     global user_counter
     if request.sid not in user_map:
         user_counter += 1
