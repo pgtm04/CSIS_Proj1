@@ -5,9 +5,7 @@ from flask_socketio import SocketIO, emit
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins=["*"])
 message_history = []
-
-user_map = {}
-user_counter = 0
+sid_to_device = {}
 
 @app.route('/')
 def welcome():
@@ -17,19 +15,16 @@ def welcome():
 def index():
     return render_template('index.html', message_history=message_history)
 
-@socketio.on('connect')
-def handle_connect():
-
-    global user_counter
-    if request.sid not in user_map:
-        user_counter += 1
-        user_map[request.sid] = f"User {user_counter}"
+@socketio.on('register_device')
+def handle_register(data):
+    device_id = data.get('deviceId', 'Anonymous')
+    sid_to_device[request.sid] = device_id
 
 @socketio.on('client_message')
 def handle_client_message(data):
      msg = data.get('message')
      if msg:
-         sender_name = user_map.get(request.sid, "Anonymous")
+         sender_name = sid_to_device.get(request.sid, "Anonymous")
          form_msg =f"{sender_name}: {msg}"
          message_history.append(form_msg)
          emit('server_response', {'message': form_msg}, broadcast=True)

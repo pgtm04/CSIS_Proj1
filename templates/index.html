@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script>
+    if (localStorage.getItem("isLoggedIn") !== "true") {
+            window.location.href = "/";
+    }    </script>
+
     <meta charset="UTF-8">
     <title>Room</title>
 </head>
@@ -24,6 +29,11 @@
     <script src = "https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script>
         const socket = io();
+        socket.on('connect', function() {
+            const deviceId = localStorage.getItem("deviceId") || "Anonymous";
+            socket.emit('register_device', { deviceId: deviceId });
+        });
+
         document.getElementById('chatForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const input = document.getElementById('message');
