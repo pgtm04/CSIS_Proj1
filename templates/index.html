@@ -1,11 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script>
-    if (localStorage.getItem("isLoggedIn") !== "true") {
-            window.location.href = "/";
-    }    </script>
-
     <meta charset="UTF-8">
     <title>Room</title>
 </head>
@@ -26,6 +21,10 @@
         </div>
     </form>
 
+    <footer>
+        <a  href="/welcome.html">Join a room</a><p></p>
+        <a  href="/create-new.html">Create a new secure access room</a>
+    </footer>
     <script src = "https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script>
         const socket = io();

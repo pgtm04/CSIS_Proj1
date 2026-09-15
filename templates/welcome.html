@@ -5,10 +5,10 @@
     <title>Welcome</title>
 </head>
 <body>
-<h1>Secure Access</h1>
+<h1>Join a room</h1>
     <form id="access-code" >
       <label for="user-password">Access Code:</label>
-      <input type="password" id="user-password" name="password" required>
+      <input type="text" id="user-password" name="password" required>
 
         <button type="submit">Submit</button>
 
@@ -16,12 +16,15 @@
 
     </form>
 
+<a href="/create-new.html">Create a new room</a>
 </body>
 
 <script>
   document.getElementById('access-code').addEventListener('submit', function(e){
     e.preventDefault();
     const pw = document.getElementById('user-password').value
+    localStorage.getItem("code")
+
     if(pw === 'SECRET'){
         localStorage.setItem("isLoggedIn", "true");
         if(!localStorage.getItem("deviceId")) {

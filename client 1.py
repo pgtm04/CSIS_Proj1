@@ -4,16 +4,40 @@ from flask_socketio import SocketIO, emit
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins=["*"])
-message_history = []
+room_histories = {}
 sid_to_device = {}
+sid_to_room = {}
 
 @app.route('/')
+def index():
+    return render_template('index.html', message_history=message_history)
+
+
+@app.route('/welcome.html')
 def welcome():
     return render_template('welcome.html')
 
-@app.route('/index.html')
-def index():
-    return render_template('index.html', message_history=message_history)
+@app.route('/create-new.html')
+def create_new():
+    return render_template('create-new.html')
+
+
+@socketio.on('join_room')
+def handle_join_room(data):
+    room = data.get('room', 'default')
+    device_id = data.get('deviceId', 'Anonymous')
+
+    # Track device info and join socket room
+    sid_to_device[request.sid] = device_id
+    sid_to_room[request.sid] = room
+    join_room(room)
+
+    # ADD TO CREATE NEW
+    if room not in room_histories:
+        room_histories[room] = []
+
+    # Send existing room history to the connecting device
+    emit('load_history', {'history': room_histories[room]})
 
 @socketio.on('register_device')
 def handle_register(data):

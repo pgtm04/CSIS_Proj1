@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create a new room</title>
+</head>
+<body>
+<h1>Create a new room</h1>
+    <form id="create-new" >
+      <label for="access-code">Create an Access Code:</label>
+      <input type="text" id="access-code" name="access-code" required>
+
+        <button type="submit">Submit</button>
+    </form>
+<script>
+  document.getElementById('create-new').addEventListener('submit', function(e){
+    e.preventDefault();
+    const pw = document.getElementById('access-code').value
+    localStorage.getItem()
+
+  })
+</script>
+
+</body>
+</html>
