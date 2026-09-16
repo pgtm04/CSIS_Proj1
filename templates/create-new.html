@@ -13,12 +13,27 @@
         <button type="submit">Submit</button>
     </form>
 <script>
-  document.getElementById('create-new').addEventListener('submit', function(e){
-    e.preventDefault();
-    const pw = document.getElementById('access-code').value
-    localStorage.getItem()
+    document.getElementById('create-new').addEventListener('submit', function(e) {
+        e.preventDefault();
+        createNewRoom();
+    });
+    const socket = io();
+    function createNewRoom() {
+        const roomName = document.getElementById('access-code').value.trim();
+        if (roomName) {
+            socket.emit('create_room', { room_name: roomName });
+        }
+    }
 
-  })
+    socket.on('room_created', function(data) {
+        console.log("CREATED")
+        if (data.success) {
+            localStorage.setItem("currentRoom", data.room);
+            window.location.href = "/";
+        } else {
+            alert(data.message);
+        }
+    });
 </script>
 
 </body>

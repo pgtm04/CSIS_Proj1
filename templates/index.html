@@ -28,10 +28,10 @@
     <script src = "https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script>
         const socket = io();
+        const currentRoom = localStorage.getItem("currentRoom") || "default";
         socket.on('connect', function() {
             const deviceId = localStorage.getItem("deviceId") || "Anonymous";
-            socket.emit('register_device', { deviceId: deviceId });
-        });
+            socket.emit('join_room', { deviceId: deviceId, room: currentRoom });        });
 
         document.getElementById('chatForm').addEventListener('submit', function(e) {
             e.preventDefault();
