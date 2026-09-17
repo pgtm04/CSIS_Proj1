@@ -31,7 +31,7 @@
         const currentRoom = localStorage.getItem("currentRoom") || "default";
         socket.on('connect', function() {
             const deviceId = localStorage.getItem("deviceId") || "Anonymous";
-            socket.emit('join_room', { deviceId: deviceId, room: currentRoom });        });
+            socket.emit('join_room', { deviceId: deviceId, room: currentRoom});        });
 
         document.getElementById('chatForm').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -46,6 +46,15 @@
             newP.textContent = data.message;
             container.appendChild(newP)
         });
+        socket.on('load_history', function (data){
+            const container = document.getElementById('message-container');
+            container.innerHTML = '';
+            data.history.forEach(msg => {
+                const newP = document.createElement('p');
+                newP.textContent = msg;
+                container.appendChild(newP)
+            })
+        })
     </script>
 
 </body>

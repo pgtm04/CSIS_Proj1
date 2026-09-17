@@ -12,12 +12,13 @@
 
         <button type="submit">Submit</button>
     </form>
+<script src = "https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
+    const socket = io();
     document.getElementById('create-new').addEventListener('submit', function(e) {
         e.preventDefault();
         createNewRoom();
     });
-    const socket = io();
     function createNewRoom() {
         const roomName = document.getElementById('access-code').value.trim();
         if (roomName) {
