@@ -27,7 +27,7 @@
     if(!localStorage.getItem("deviceId")) {
         localStorage.setItem("deviceId", "Device_" + Math.floor(1000 + Math.random() * 9000));
     }
-    socket.emit('join_room', { room: pw });
+    socket.emit('join_room', { room: pw, deviceId: localStorage.getItem("deviceId") });
 
     socket.on('load_history', function(data) {
         if (data.success) {

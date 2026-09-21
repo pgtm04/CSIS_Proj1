@@ -4,7 +4,7 @@ from flask_socketio import SocketIO, emit, join_room
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins=["*"])
-room_histories = {}
+room_histories = {"default": []}
 sid_to_device = {}
 sid_to_room = {}
 
@@ -31,7 +31,7 @@ def handle_join_room(data):
         sid_to_room[request.sid] = room
         join_room(room)
         print(room)
-        emit('load_history', {'success': True, 'history': room_histories[room]}, to=request.sid)
+        emit('load_history', {'success': True, 'room': room, 'history': room_histories[room]}, to=request.sid)
     else:
         emit('load_history', {'success': False}, to=request.sid)
 
@@ -48,11 +48,11 @@ def handle_client_message(data):
          sender_name = sid_to_device.get(request.sid, "Anonymous")
          formatted_msg = f"{sender_name}: {msg}"
 
-         # Initialize room history if it doesn't exist yet
          if room not in room_histories:
              room_histories[room] = []
 
          room_histories[room].append(formatted_msg)
+         join_room(room)
          emit('server_response', {'message': formatted_msg}, to=room)
 
 

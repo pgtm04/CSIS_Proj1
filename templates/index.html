@@ -29,9 +29,14 @@
     <script>
         const socket = io();
         const currentRoom = localStorage.getItem("currentRoom") || "default";
+        let deviceId = localStorage.getItem("deviceId");
         socket.on('connect', function() {
-            const deviceId = localStorage.getItem("deviceId") || "Anonymous";
-            socket.emit('join_room', { deviceId: deviceId, room: currentRoom});        });
+            if (localStorage.getItem("deviceId")==="Anonymous") {
+                deviceId = "Device_" + Math.floor(1000 + Math.random() * 9000);
+                localStorage.setItem("deviceId", deviceId);
+            }
+            socket.emit('join_room', { deviceId: deviceId, room: currentRoom});
+        });
 
         document.getElementById('chatForm').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -47,13 +52,15 @@
             container.appendChild(newP)
         });
         socket.on('load_history', function (data){
-            const container = document.getElementById('message-container');
-            container.innerHTML = '';
-            data.history.forEach(msg => {
-                const newP = document.createElement('p');
-                newP.textContent = msg;
-                container.appendChild(newP)
-            })
+            if (data.success && data.history) {
+                const container = document.getElementById('message-container');
+                container.innerHTML = '';
+                data.history.forEach(msg => {
+                    const newP = document.createElement('p');
+                    newP.textContent = msg;
+                    container.appendChild(newP)
+                })
+            }
         })
     </script>
 
