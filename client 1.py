@@ -1,6 +1,6 @@
 import os
 import socket
-from flask import Flask, render_template, request, url_for, send_from_directory
+from flask import Flask, render_template, request, url_for, send_from_directory, jsonify
 from flask_socketio import SocketIO, emit, join_room
 from werkzeug.utils import secure_filename, redirect
 
@@ -9,8 +9,6 @@ socketio = SocketIO(app, cors_allowed_origins=["*"])
 room_histories = {"default": []}
 sid_to_device = {}
 sid_to_room = {}
-ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1000 * 1000
 app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'uploads')
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
@@ -65,21 +63,34 @@ def handle_client_message(data):
          join_room(room)
          emit('server_response', {'message': formatted_msg}, to=room)
 
+
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part'}), 400
+
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+
+    if file:
+        filename = secure_filename(file.filename)
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(filepath)
+
+        file_url = url_for('download_file', name=filename)
+        return jsonify({'url': file_url})
+
 @socketio.on('upload-file')
 def handle_upload_file(data):
     room = sid_to_room.get(request.sid, 'default')
     if room not in room_histories:
         room_histories[room] = []
-    file_bytes = data.get('file')
-    original_name = data.get('name', 'uploaded_file')
-    filename = secure_filename(original_name)
-    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-
-    with open(filepath, 'wb') as f:
-        f.write(file_bytes)
-
+    file_url = data.get('file_url')
+    if not file_url:
+        return
+    formatted_msg = f"{sid_to_device.get(request.sid, "Anonymous")}: {file_url}"
     join_room(room)
-    formatted_msg = f"{sid_to_device.get(request.sid, "Anonymous")}: {(url_for('download_file', name=filename))}"
     room_histories[room].append(formatted_msg)
 
     emit('server_response', {'message':formatted_msg}, to=room)

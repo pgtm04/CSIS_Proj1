@@ -11,6 +11,9 @@
         <input type="text" id="message" name="message" required>
 
         <button type="submit">Share</button>
+        <button id="pasteBtn">Paste Content</button>
+        <div id="output"></div>
+
 
         <div id="message-container" style="margin-top: 20px; color: blue;">
             {% if message_history %}
@@ -52,18 +55,44 @@
             e.preventDefault();
             const input = document.getElementById('myFile');
             const file = input.files[0];
-            const reader = new FileReader();
-                reader.onload = function(evt) {
-                    socket.emit("upload-file", {file: evt.target.result, name: file.name});
+            if (!file) return;
+            const formData = new FormData();
+            formData.append('file', file)
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.url) {
+                    socket.emit("upload-file", { file_url: data.url });
                     input.value = '';
-                };
-            reader.readAsArrayBuffer(file);
+                }
+            })
         });
-
+        document.getElementById("pasteBtn").addEventListener("click", async () => {
+        try {
+            document.getElementById("output").innerText = await navigator.clipboard.readText();
+        } catch (err) {
+            console.error("Failed to read clipboard contents: ", err);
+        }
+        });
         socket.on('server_response', function(data){
+            appendMessage(data.message);
+        });
+        socket.on('load_history', function (data){
+            if (data.success && data.history) {
+                const container = document.getElementById('message-container');
+                container.innerHTML = '';
+                data.history.forEach(msg => {
+                    appendMessage(msg);
+                })
+            }
+        })
+        function appendMessage(msg){
             const container = document.getElementById('message-container');
             const newP = document.createElement('p');
-            const parts = data.message.split(': ');
+            const parts = msg.split(': ');
             if (parts.length > 1 && parts[1].startsWith('/')) {
                 const sender = parts[0];
                 const fileUrl = parts[1];
@@ -77,21 +106,11 @@
 
                 newP.appendChild(link);
             } else {
-                newP.textContent = data.message;
+                newP.textContent = msg;
             }
             container.appendChild(newP)
-        });
-        socket.on('load_history', function (data){
-            if (data.success && data.history) {
-                const container = document.getElementById('message-container');
-                container.innerHTML = '';
-                data.history.forEach(msg => {
-                    const newP = document.createElement('p');
-                    newP.textContent = msg;
-                    container.appendChild(newP)
-                })
-            }
-        })
+
+        }
     </script>
 
 </body>
