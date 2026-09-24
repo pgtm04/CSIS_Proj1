@@ -11,9 +11,7 @@
         <input type="text" id="message" name="message" required>
 
         <button type="submit">Share</button>
-        <button id="pasteBtn">Paste Content</button>
-        <div id="output"></div>
-
+        <button type="button" id="pasteBtn">Paste Content</button>
 
         <div id="message-container" style="margin-top: 20px; color: blue;">
             {% if message_history %}
@@ -70,12 +68,13 @@
                 }
             })
         });
-        document.getElementById("pasteBtn").addEventListener("click", async () => {
-        try {
-            document.getElementById("output").innerText = await navigator.clipboard.readText();
-        } catch (err) {
-            console.error("Failed to read clipboard contents: ", err);
-        }
+        document.getElementById("pasteBtn").addEventListener("click", async (e) => {
+            e.preventDefault();
+            try {
+                document.getElementById("message").value = await navigator.clipboard.readText();
+            } catch (err) {
+                console.error("Failed to read clipboard contents: ", err);
+            }
         });
         socket.on('server_response', function(data){
             appendMessage(data.message);
