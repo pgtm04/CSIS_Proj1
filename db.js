@@ -28,6 +28,8 @@ export const simpleIDB = {
                 gRequest.onerror = function() {
                     reject(gRequest.error)
                 }
+               console.log("set")
+
             }
             oRequest.onerror = function() {
                 reject(oRequest.error)
@@ -49,6 +51,8 @@ export const simpleIDB = {
             gRequest.onerror = function() {
                 reject(gRequest.error)
             }
+           console.log("set")
+
         }
         oRequest.onerror = function() {
             reject(oRequest.error)

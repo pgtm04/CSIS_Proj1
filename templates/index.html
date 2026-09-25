@@ -6,7 +6,7 @@
 </head>
 <body>
     <h1>Hello!</h1>
-    <form id="chatForm">
+    <form id="chatForm" action="javascript:void(0);" method="POST">
         <label for="message">Message:</label>
         <input type="text" id="message" name="message" required>
 
@@ -21,7 +21,7 @@
             {% endif %}
         </div>
     </form>
-    <form id="fileForm">
+    <form id="fileForm" action="javascript:void(0);" method="POST">
       <input type="file" id="myFile" name="filename">
       <button type="submit">Share</button><p></p>
     </form>
@@ -30,28 +30,20 @@
         <a  href="/create-new.html">Create a new secure access room</a>
     </footer>
     <script src = "https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-    <script type="module">
+    <script>
         import { simpleIDB } from './db.js';
-        await simpleIDB().initialize();
         const socket = io();
-        const currentRoom = await simpleIDB.get("currentRoom") || "default";
-        let deviceId = await simpleIDB.get("deviceId");
-        socket.on('connect', async function() {
-            if (await simpleIDB.get("deviceId")==="Anonymous" || !deviceId) {
-                deviceId = "Device_" + Math.floor(1000 + Math.random() * 9000);
-                await simpleIDB.set("deviceId", deviceId);
-            }
-            socket.emit('join_room', { deviceId: deviceId, room: currentRoom});
-        });
+        let currentRoom =  "default";
+        let deviceId = null;
 
-        document.getElementById('chatForm').addEventListener('submit', function(e) {
+        document.getElementById('chatForm').addEventListener('submit', function (e) {
             e.preventDefault();
             const input = document.getElementById('message');
 
-            socket.emit('client_message', { message: input.value });
+            socket.emit('client_message', {message: input.value});
             input.value = '';
         });
-        document.getElementById('fileForm').addEventListener('submit', function(e) {
+        document.getElementById('fileForm').addEventListener('submit', function (e) {
             e.preventDefault();
             const input = document.getElementById('myFile');
             const file = input.files[0];
@@ -62,13 +54,13 @@
                 method: 'POST',
                 body: formData
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.url) {
-                    socket.emit("upload-file", { file_url: data.url });
-                    input.value = '';
-                }
-            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.url) {
+                        socket.emit("upload-file", {file_url: data.url});
+                        input.value = '';
+                    }
+                })
         });
         document.getElementById("pasteBtn").addEventListener("click", async (e) => {
             e.preventDefault();
@@ -78,10 +70,36 @@
                 console.error("Failed to read clipboard contents: ", err);
             }
         });
-        socket.on('server_response', function(data){
+
+
+        async function initApp() {
+            try {
+                await simpleIDB().initialize();
+                currentRoom = await simpleIDB.get("currentRoom") || "default";
+                deviceId = await simpleIDB.get("deviceId");
+                if (!deviceId || deviceId === "Anonymous") {
+                    deviceId = "Device_" + Math.floor(1000 + Math.random() * 9000);
+                    await simpleIDB.set("deviceId", deviceId);
+                }
+
+                socket.emit('join_room', { deviceId: deviceId, room: currentRoom });
+            } catch (err) {
+                console.error("IndexedDB Initialization Error:", err);
+                socket.emit('join_room', { deviceId: "Anonymous", room: "default" });
+            }
+        }
+        initApp();
+        socket.on('connect', async function () {
+            if (await simpleIDB.get("deviceId") === "Anonymous" || !deviceId) {
+                deviceId = "Device_" + Math.floor(1000 + Math.random() * 9000);
+                await simpleIDB.set("deviceId", deviceId);
+            }
+            socket.emit('join_room', {deviceId: deviceId, room: currentRoom});
+        });
+        socket.on('server_response', function (data) {
             appendMessage(data.message);
         });
-        socket.on('load_history', function (data){
+        socket.on('load_history', function (data) {
             if (data.success && data.history) {
                 const container = document.getElementById('message-container');
                 container.innerHTML = '';
