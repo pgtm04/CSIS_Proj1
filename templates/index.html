@@ -30,14 +30,16 @@
         <a  href="/create-new.html">Create a new secure access room</a>
     </footer>
     <script src = "https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-    <script>
+    <script type="module">
+        import { simpleIDB } from './db.js';
+        await simpleIDB().initialize();
         const socket = io();
-        const currentRoom = localStorage.getItem("currentRoom") || "default";
-        let deviceId = localStorage.getItem("deviceId");
-        socket.on('connect', function() {
-            if (localStorage.getItem("deviceId")==="Anonymous" || !deviceId) {
+        const currentRoom = await simpleIDB.get("currentRoom") || "default";
+        let deviceId = await simpleIDB.get("deviceId");
+        socket.on('connect', async function() {
+            if (await simpleIDB.get("deviceId")==="Anonymous" || !deviceId) {
                 deviceId = "Device_" + Math.floor(1000 + Math.random() * 9000);
-                localStorage.setItem("deviceId", deviceId);
+                await simpleIDB.set("deviceId", deviceId);
             }
             socket.emit('join_room', { deviceId: deviceId, room: currentRoom});
         });
