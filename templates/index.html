@@ -29,17 +29,27 @@
         <a  href="/welcome.html">Join a room</a><p></p>
         <a  href="/create-new.html">Create a new secure access room</a>
     </footer>
+    <script src="/db.js"></script>
     <script src = "https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script>
         const socket = io();
         const currentRoom = localStorage.getItem("currentRoom") || "default";
         let deviceId = localStorage.getItem("deviceId");
-        socket.on('connect', function() {
+        socket.on('connect', async function() {
             if (localStorage.getItem("deviceId")==="Anonymous" || !deviceId) {
                 deviceId = "Device_" + Math.floor(1000 + Math.random() * 9000);
                 localStorage.setItem("deviceId", deviceId);
             }
             socket.emit('join_room', { deviceId: deviceId, room: currentRoom});
+
+            const messages = await getMessages(currentRoom);
+            console.log(messages);
+            const container = document.getElementById('message-container');
+            container.innerHTML = '';
+
+            messages.forEach(message => {
+                appendMessage(message.text);
+            });
         });
 
         document.getElementById('chatForm').addEventListener('submit', function(e) {
@@ -76,17 +86,21 @@
                 console.error("Failed to read clipboard contents: ", err);
             }
         });
-        socket.on('server_response', function(data){
+        socket.on('server_response', async function(data){
             appendMessage(data.message);
+
+            await saveMessage({
+                room: currentRoom,
+                text: data.message,
+            });
         });
-        socket.on('load_history', function (data){
-            if (data.success && data.history) {
-                const container = document.getElementById('message-container');
-                container.innerHTML = '';
-                data.history.forEach(msg => {
-                    appendMessage(msg);
-                })
-            }
+        socket.on('load_history', async function (){
+            const messages = await getMessages(currentRoom);
+            const container = document.getElementById('message-container');
+            container.innerHTML = '';
+            messages.forEach(message => {
+                appendMessage(message.text);
+            })
         })
         function appendMessage(msg){
             const container = document.getElementById('message-container');
@@ -109,6 +123,25 @@
             }
             container.appendChild(newP)
 
+        }
+        async function getMessages(room) {
+            const db = await getDB();
+
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction("messages", "readonly");
+                const store = transaction.objectStore("messages");
+                const index = store.index("room");
+
+                const request = index.getAll(room);
+
+                request.onsuccess = function() {
+                    resolve(request.result);
+                };
+
+                request.onerror = function() {
+                    reject(request.error);
+                };
+            });
         }
     </script>
 
