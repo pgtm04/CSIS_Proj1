@@ -21,6 +21,7 @@
             {% endif %}
         </div>
     </form>
+    <button type="button" id="clearBtn">Clear Storage</button>
     <form id="fileForm">
       <input type="file" id="myFile" name="filename">
       <button type="submit">Share</button><p></p>
@@ -29,7 +30,58 @@
         <a  href="/welcome.html">Join a room</a><p></p>
         <a  href="/create-new.html">Create a new secure access room</a>
     </footer>
-    <script src="/db.js"></script>
+    <script>
+        const DB_NAME = "ShareRoomDB";
+        const DB_VERSION = 1;
+
+        function getDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+                request.onupgradeneeded = function(event) {
+                    const db = event.target.result;
+
+                    if (!db.objectStoreNames.contains("messages")) {
+                        const messages = db.createObjectStore("messages", {
+                            keyPath: "id",
+                            autoIncrement: true
+                        });
+                        messages.createIndex("room", "room", { unique: false });
+                    }
+
+                    if (!db.objectStoreNames.contains("files")) {
+                        const files = db.createObjectStore("files", {
+                            keyPath: "id",
+                            autoIncrement: true
+                        });
+                        files.createIndex("room", "room", { unique: false });
+                    }
+                };
+
+                request.onsuccess = function() {
+                    resolve(request.result);
+                };
+
+                request.onerror = function() {
+                    reject(request.error);
+                };
+            });
+        }
+
+        async function saveMessage(message) {
+            const db = await getDB();
+
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction("messages", "readwrite");
+                const store = transaction.objectStore("messages");
+
+                const request = store.add(message);
+
+                request.onsuccess = () => resolve();
+                request.onerror = () => reject(request.error);
+            });
+        }
+    </script>
     <script src = "https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script>
         const socket = io();
@@ -41,15 +93,18 @@
                 localStorage.setItem("deviceId", deviceId);
             }
             socket.emit('join_room', { deviceId: deviceId, room: currentRoom});
+            try {
+                const messages = await getMessages(currentRoom);
+                console.log(messages);
+                const container = document.getElementById('message-container');
+                container.innerHTML = '';
 
-            const messages = await getMessages(currentRoom);
-            console.log(messages);
-            const container = document.getElementById('message-container');
-            container.innerHTML = '';
-
-            messages.forEach(message => {
-                appendMessage(message.text);
-            });
+                messages.forEach(message => {
+                    appendMessage(message.text);
+                });
+            } catch (err) {
+                console.error("Failed to load messages from IndexedDB:", err);
+            }
         });
 
         document.getElementById('chatForm').addEventListener('submit', function(e) {
@@ -86,41 +141,68 @@
                 console.error("Failed to read clipboard contents: ", err);
             }
         });
+        document.getElementById("clearBtn").addEventListener("click", async (e) => {
+            e.preventDefault();
+            const db = await getDB();
+
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction("messages", "readwrite");
+                const store = transaction.objectStore("messages");
+                const request = store.clear();
+
+                request.onsuccess = function() {
+                    resolve(request.result);
+                };
+
+                request.onerror = function() {
+                    reject(request.error);
+                };
+            });
+
+        });
+
         socket.on('server_response', async function(data){
             appendMessage(data.message);
-
-            await saveMessage({
-                room: currentRoom,
-                text: data.message,
-            });
+            try {
+                await saveMessage({
+                    room: currentRoom,
+                    text: data.message,
+                });
+            } catch (err) {
+                console.error("Failed to save message to IndexedDB:", err);
+            }
         });
         socket.on('load_history', async function (){
-            const messages = await getMessages(currentRoom);
-            const container = document.getElementById('message-container');
-            container.innerHTML = '';
-            messages.forEach(message => {
-                appendMessage(message.text);
-            })
+            try {
+                const messages = await getMessages(currentRoom);
+                const container = document.getElementById('message-container');
+                container.innerHTML = '';
+                messages.forEach(message => {
+                    appendMessage(message.text);
+                })
+            } catch (err) {
+                console.error("Failed to load history:", err);
+            }
         })
         function appendMessage(msg){
             const container = document.getElementById('message-container');
             const newP = document.createElement('p');
-            // const parts = msg.split(': ');
-            // if (parts.length > 1 && parts[1].startsWith('/')) {
-            //     const sender = parts[0];
-            //     const fileUrl = parts[1];
-            //
-            //     newP.appendChild(document.createTextNode(`${sender}: `));
-            //
-            //     const link = document.createElement('a');
-            //     link.href = fileUrl;
-            //     link.textContent = "Open File";
-            //     link.target = "_blank";
-            //
-            //     newP.appendChild(link);
-            // } else {
+            const parts = msg.split(': ');
+            if (parts.length > 1 && parts[1].startsWith('/')) {
+                const sender = parts[0];
+                const fileUrl = parts[1];
+
+                newP.appendChild(document.createTextNode(`${sender}: `));
+
+                const link = document.createElement('a');
+                link.href = fileUrl;
+                link.textContent = "Open File";
+                link.target = "_blank";
+
+                newP.appendChild(link);
+            } else {
                 newP.textContent = msg;
-            //}
+            }
             container.appendChild(newP)
 
         }
