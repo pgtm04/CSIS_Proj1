@@ -43,6 +43,12 @@ def handle_join_room(data):
     else:
         emit('load_history', {'success': False}, to=request.sid)
 
+@socketio.on('print')
+def handle_print(data):
+    print(data)
+
+
+
 @socketio.on('register_device')
 def handle_register(data):
     device_id = data.get('deviceId', 'Anonymous')

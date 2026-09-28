@@ -1,4 +1,4 @@
-const dbRequest = indexedDB.open("ShareRoomDB", 1);
+const dbRequest = indexedDB.open("ShareRoomDB");
 
 dbRequest.onupgradeneeded = function(event) {
     const db = event.target.result;
@@ -10,7 +10,6 @@ dbRequest.onupgradeneeded = function(event) {
         });
 
         messages.createIndex("room", "room", { unique: false });
-        messages.createIndex("timestamp", "timestamp", { unique: false });
     }
 
     if (!db.objectStoreNames.contains("files")) {
@@ -20,7 +19,6 @@ dbRequest.onupgradeneeded = function(event) {
         });
 
         files.createIndex("room", "room", { unique: false });
-        files.createIndex("timestamp", "timestamp", { unique: false });
     }
 };
 

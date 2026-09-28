@@ -105,22 +105,22 @@
         function appendMessage(msg){
             const container = document.getElementById('message-container');
             const newP = document.createElement('p');
-            const parts = msg.split(': ');
-            if (parts.length > 1 && parts[1].startsWith('/')) {
-                const sender = parts[0];
-                const fileUrl = parts[1];
-
-                newP.appendChild(document.createTextNode(`${sender}: `));
-
-                const link = document.createElement('a');
-                link.href = fileUrl;
-                link.textContent = "Open File";
-                link.target = "_blank";
-
-                newP.appendChild(link);
-            } else {
+            // const parts = msg.split(': ');
+            // if (parts.length > 1 && parts[1].startsWith('/')) {
+            //     const sender = parts[0];
+            //     const fileUrl = parts[1];
+            //
+            //     newP.appendChild(document.createTextNode(`${sender}: `));
+            //
+            //     const link = document.createElement('a');
+            //     link.href = fileUrl;
+            //     link.textContent = "Open File";
+            //     link.target = "_blank";
+            //
+            //     newP.appendChild(link);
+            // } else {
                 newP.textContent = msg;
-            }
+            //}
             container.appendChild(newP)
 
         }
