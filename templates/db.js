@@ -14,6 +14,7 @@ function getDB() {
                     autoIncrement: true
                 });
                 messages.createIndex("room", "room", { unique: false });
+                messages.createIndex("timeAdded", "timeAdded", { unique: false });
             }
 
             if (!db.objectStoreNames.contains("files")) {
@@ -22,6 +23,7 @@ function getDB() {
                     autoIncrement: true
                 });
                 files.createIndex("room", "room", { unique: false });
+                files.createIndex("timeAdded", "timeAdded", { unique: false });
             }
         };
 
@@ -33,6 +35,29 @@ function getDB() {
             reject(request.error);
         };
     });
+}
+async function cleanupExpiredData(db, tableName) {
+    const transaction = db.transaction(tableName,  "readwrite")
+    const store = transaction.objectStore(tableName);
+    const index = store.index("timeAdded")
+
+    const range = IDBKeyRange.upperBound(Date.now()-(3600 * 1000*24))
+    const request=  index.openCursor();
+
+    request.onsuccess = (event) => {
+        const cursor = event.target.result;
+        if (cursor) {
+          cursor.delete();
+          cursor.continue();
+        } else {
+          console.log('All matching records deleted.');
+        }
+    };
+
+    request.onerror = (event) => {
+    console.error('Error deleting records:', event.target.error);
+    };
+
 }
 
 async function saveMessage(message) {

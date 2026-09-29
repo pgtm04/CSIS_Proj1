@@ -14,11 +14,6 @@
         <button type="button" id="pasteBtn">Paste Content</button>
 
         <div id="message-container" style="margin-top: 20px; color: blue;">
-            {% if message_history %}
-                {% for msg in message_history %}
-                    <p>{{ msg }}</p>
-                {% endfor %}
-            {% endif %}
         </div>
     </form>
     <button type="button" id="clearBtn">Clear Storage</button>
@@ -152,6 +147,8 @@
 
                 request.onsuccess = function() {
                     resolve(request.result);
+                    const container = document.getElementById('message-container');
+                    container.innerHTML = '';
                 };
 
                 request.onerror = function() {
