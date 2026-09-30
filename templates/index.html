@@ -3,17 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <title>Room</title>
+    <link rel = "stylesheet" href="./style.css">
 </head>
 <body>
-    <h1>Hello!</h1>
-    <form id="chatForm">
+    <h1 class="heading"> Hello!</h1>
+    <form class="chatForm" id="chatForm">
         <label for="message">Message:</label>
         <input type="text" id="message" name="message" required>
 
         <button type="submit">Share</button>
         <button type="button" id="pasteBtn">Paste Content</button>
 
-        <div id="message-container" style="margin-top: 20px; color: blue;">
+        <div id="message-container">
         </div>
     </form>
     <button type="button" id="clearBtn">Clear Storage</button>
