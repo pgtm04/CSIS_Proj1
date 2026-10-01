@@ -12,8 +12,13 @@ h1 {
 
 #message-container {
     margin-top: 20px;
-    color: #359352
+    color: #359352;
+    font-family: "Revalia", sans-serif;
 }
 body{
-    background-color: #bafdfb;
+    background-image: url('../images/bg1.jpg');
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
 }
