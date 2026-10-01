@@ -4,13 +4,14 @@ from flask import Flask, render_template, request, url_for, send_from_directory,
 from flask_socketio import SocketIO, emit, join_room
 from werkzeug.utils import secure_filename, redirect
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='', static_folder='.')
 socketio = SocketIO(app, cors_allowed_origins=["*"])
 room_histories = {"default": []}
 sid_to_device = {}
 sid_to_room = {}
 app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'uploads')
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
 
 @app.route('/uploads/<name>')
 def download_file(name):
