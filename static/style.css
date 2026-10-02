@@ -22,3 +22,54 @@ body{
     background-repeat: no-repeat;
     background-attachment: fixed;
 }
+
+.card{
+    width: 75px;
+    height: 75px;
+    padding: 15px;
+    background-color: #d3e8fa;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+    flex-direction: row;
+}
+
+.messageTile{
+    width: 300px;
+    padding: 15px;
+    background-color: #d3e8fa;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+}
+
+#drop-zone {
+  width: 100%;
+  max-width: 500px;
+  height: 200px;
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 20px;
+  color: #666;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+  outline: none;
+}
+
+#drop-zone.active {
+  background-color: #f0f7ff;
+  border-color: #0066cc;
+  color: #0066cc;
+}
+
+#output {
+  margin-top: 20px;
+  white-space: pre-wrap;
+  font-family: monospace;
+}

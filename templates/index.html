@@ -10,21 +10,21 @@
 </head>
 <body>
     <h1 class="heading"> Hello!</h1>
-    <form class="chatForm" id="chatForm">
-        <label for="message">Message:</label>
-        <input type="text" id="message" name="message" required>
+        <form class="chatForm" id="chatForm">
+            <div class="messageTile">
+            <label for="message">Message:</label>
+            <input type="text" id="message" name="message" required>
+            <p></p><input type="file" id="myFile" name="filename">
+            </div>
 
-        <button type="submit">Share</button>
-        <button type="button" id="pasteBtn">Paste Content</button>
+            <button class = "card" type="submit">Share</button>
+            <button class="card" type="button" id="pasteBtn">Paste Content</button>
 
-        <div id="message-container">
-        </div>
-    </form>
+        </form>
+    <div id="message-container"></div>
+
     <button type="button" id="clearBtn">Clear Storage</button>
-    <form id="fileForm">
-      <input type="file" id="myFile" name="filename">
-      <button type="submit">Share</button><p></p>
-    </form>
+
     <footer>
         <a  href="/welcome.html">Join a room</a><p></p>
         <a  href="/create-new.html">Create a new secure access room</a>
@@ -108,29 +108,31 @@
 
         document.getElementById('chatForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            const input = document.getElementById('message');
+            if(document.getElementById('myFile'))
+            {
+                const input = document.getElementById('myFile');
+                const file = input.files[0];
+                if (!file) return;
+                const formData = new FormData();
+                formData.append('file', file)
+                fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.url) {
+                        socket.emit("upload-file", { file_url: data.url });
+                        input.value = '';
+                    }
+                })
+            }
+            else{
+                const input = document.getElementById('message');
 
-            socket.emit('client_message', { message: input.value });
-            input.value = '';
-        });
-        document.getElementById('fileForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const input = document.getElementById('myFile');
-            const file = input.files[0];
-            if (!file) return;
-            const formData = new FormData();
-            formData.append('file', file)
-            fetch('/upload', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.url) {
-                    socket.emit("upload-file", { file_url: data.url });
-                    input.value = '';
-                }
-            })
+                socket.emit('client_message', {message: input.value});
+                input.value = '';
+            }
         });
         document.getElementById("pasteBtn").addEventListener("click", async (e) => {
             e.preventDefault();
