@@ -13,12 +13,12 @@
         <form class="chatForm" id="chatForm">
             <div class="messageTile">
             <label for="message">Message:</label>
-            <input type="text" id="message" name="message" required>
+            <input type="text" id="message" name="message">
+            <button class="card" type="button" id="pasteBtn">Paste Content</button>
             <p></p><input type="file" id="myFile" name="filename">
             </div>
 
             <button class = "card" type="submit">Share</button>
-            <button class="card" type="button" id="pasteBtn">Paste Content</button>
 
         </form>
     <div id="message-container"></div>
@@ -105,10 +105,35 @@
                 console.error("Failed to load messages from IndexedDB:", err);
             }
         });
+        document.getElementById('message').addEventListener('input', function() {
+            if(document.getElementById('message').value.trim().length>0) {
+                document.getElementById('myFile').disabled = true;
+            }
+            else{
+                document.getElementById('myFile').disabled = false;
+
+            }
+        })
+        document.getElementById('myFile').addEventListener('input', function() {
+            if(document.getElementById('myFile').files.length>0) {
+                document.getElementById('message').disabled = true;
+            }
+            else{
+                document.getElementById('message').disabled = false;
+
+            }
+        })
 
         document.getElementById('chatForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            if(document.getElementById('myFile'))
+            if(document.getElementById('message').value.trim().length>0) {
+                const input = document.getElementById('message');
+
+                socket.emit('client_message', {message: input.value});
+                input.value = '';
+            }
+
+            if(document.getElementById('myFile').files.length>0)
             {
                 const input = document.getElementById('myFile');
                 const file = input.files[0];
@@ -127,17 +152,17 @@
                     }
                 })
             }
-            else{
-                const input = document.getElementById('message');
+            document.getElementById('message').disabled = false;
+            document.getElementById('myFile').disabled = false;
 
-                socket.emit('client_message', {message: input.value});
-                input.value = '';
-            }
         });
+
         document.getElementById("pasteBtn").addEventListener("click", async (e) => {
             e.preventDefault();
             try {
                 document.getElementById("message").value = await navigator.clipboard.readText();
+                document.getElementById('myFile').disabled = true;
+
             } catch (err) {
                 console.error("Failed to read clipboard contents: ", err);
             }
@@ -228,6 +253,7 @@
                 };
             });
         }
+
     </script>
 
 </body>

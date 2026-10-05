@@ -1,8 +1,7 @@
 import os
-import socket
 from flask import Flask, render_template, request, url_for, send_from_directory, jsonify
 from flask_socketio import SocketIO, emit, join_room
-from werkzeug.utils import secure_filename, redirect
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__, static_url_path='', static_folder='.')
 socketio = SocketIO(app, cors_allowed_origins=["*"])

@@ -24,25 +24,28 @@ body{
 }
 
 .card{
-    width: 75px;
-    height: 75px;
-    padding: 15px;
+    padding: 10px 18px;
     background-color: #d3e8fa;
+    border: none;
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     cursor: pointer;
-    flex-direction: row;
+    font-weight: bold;
 }
 
 .messageTile{
-    width: 300px;
+    width: 400px;
     padding: 15px;
     background-color: #d3e8fa;
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    cursor: pointer;
+}
+.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+  background-color: #e0e0e0;
 }
 
 #drop-zone {
