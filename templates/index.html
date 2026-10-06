@@ -9,26 +9,27 @@
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
+<div class = grid-container>
+    <div class = "left-panel">
     <h1 class="heading"> Hello!</h1>
         <form class="chatForm" id="chatForm">
             <div class="messageTile">
             <label for="message">Message:</label>
             <input type="text" id="message" name="message">
             <button class="card" type="button" id="pasteBtn">Paste Content</button>
-            <p></p><input type="file" id="myFile" name="filename">
+            <p></p><input class = "fileDrop" type="file" id="myFile" name="filename">
             </div>
 
             <button class = "card" type="submit">Share</button>
 
         </form>
+    <a  href="/welcome.html">Join a room</a><p></p>
+    <a  href="/create-new.html">Create a new secure access room</a>
+    <button class = "card" type="button" id="clearBtn">Clear Storage</button>
+    </div>
     <div id="message-container"></div>
 
-    <button type="button" id="clearBtn">Clear Storage</button>
-
-    <footer>
-        <a  href="/welcome.html">Join a room</a><p></p>
-        <a  href="/create-new.html">Create a new secure access room</a>
-    </footer>
+</div>
     <script>
         const DB_NAME = "ShareRoomDB";
         const DB_VERSION = 1;

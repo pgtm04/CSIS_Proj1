@@ -3,17 +3,28 @@
   font-weight: 400;
   font-style: normal;
 }
-
+.grid-container{
+    display: grid;
+    grid-template-columns: minmax(320px, 450px);
+    gap: 30px;
+    align-items: start;
+}
 h1 {
     color: #61aeff;
-    font-family: Revalia, sans-serif;
-
 }
-
+.left-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
 #message-container {
-    margin-top: 20px;
+    margin-top: 0;
+    padding: 15px;
+    background-color: rgba(211, 232, 250, 0.4);
+    border-radius: 10px;
+    min-height: 200px;
     color: #359352;
-    font-family: "Revalia", sans-serif;
+    font-family: "Lucida Sans", sans-serif;
 }
 body{
     background-image: url('../images/bg1.jpg');
@@ -21,6 +32,8 @@ body{
     background-size: cover;
     background-repeat: no-repeat;
     background-attachment: fixed;
+    font-family: "Revalia", sans-serif;
+
 }
 
 .card{
@@ -31,16 +44,20 @@ body{
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     cursor: pointer;
-    font-weight: bold;
+    font-family: "Revalia", sans-serif;
 }
 
 .messageTile{
-    width: 400px;
+    grid-column: 1;
+    width: 100%;
     padding: 15px;
     background-color: #d3e8fa;
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    font-family: "Revalia", sans-serif;
+    box-sizing: border-box;
+
 }
 .disabled {
   opacity: 0.5;
@@ -48,6 +65,21 @@ body{
   background-color: #e0e0e0;
 }
 
+
+.fileDrop::file-selector-button {
+    padding: 10px 18px;
+    background-color: #d3e8fa;
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+    font-family: "Revalia", sans-serif;
+}
+
+.fileDrop::file-selector-button:hover {
+  background-color:#d3e8fa;
+}
 #drop-zone {
   width: 100%;
   max-width: 500px;
