@@ -5,8 +5,7 @@
 }
 .grid-container{
     display: grid;
-    grid-template-columns: minmax(320px, 450px);
-    gap: 30px;
+    grid-template-columns: minmax(320px, 450px) 1fr;    gap: 30px;
     align-items: start;
 }
 h1 {
@@ -25,6 +24,7 @@ h1 {
     min-height: 200px;
     color: #359352;
     font-family: "Lucida Sans", sans-serif;
+
 }
 body{
     background-image: url('../images/bg1.jpg');
@@ -45,6 +45,7 @@ body{
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     cursor: pointer;
     font-family: "Revalia", sans-serif;
+    color: #82a691
 }
 
 .messageTile{
@@ -75,6 +76,9 @@ body{
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     cursor: pointer;
     font-family: "Revalia", sans-serif;
+    color: #82a691
+
+
 }
 
 .fileDrop::file-selector-button:hover {
