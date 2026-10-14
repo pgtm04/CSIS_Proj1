@@ -15,12 +15,16 @@
         <form class="chatForm" id="chatForm">
             <div class="messageTile">
             <label for="message">Message:</label>
-            <input type="text" id="message" name="message">
-            <button class="card" type="button" id="pasteBtn">Paste Content</button>
+            <div class = "input-container">
+                <input type="text" id="message" name="message">
+                <button class="card" type="button" id="pasteBtn">
+                  <img src="/images/paste1.png" alt="Paste Icon" width="25" height="25">
+                </button>
+            </div>
             <p></p><input class = "fileDrop" type="file" id="myFile" name="filename">
             </div>
 
-            <button class = "card" type="submit">Share</button>
+            <p></p><button class = "card2" type="submit">Share</button>
 
         </form>
     <a  href="/welcome.html">Join a room</a>
@@ -118,6 +122,8 @@
         document.getElementById('myFile').addEventListener('input', function() {
             if(document.getElementById('myFile').files.length>0) {
                 document.getElementById('message').disabled = true;
+                document.getElementById('pasteBtn').disabled = true;
+
             }
             else{
                 document.getElementById('message').disabled = false;
@@ -217,7 +223,7 @@
             const container = document.getElementById('message-container');
             const newP = document.createElement('p');
             const parts = msg.split(': ');
-            if (parts.length > 1 && parts[1].startsWith('/')) {
+            if (parts.length > 1 && /^\/[^\s]+\.[a-zA-Z0-9]{2,4}$/.test(parts[1].trim())) {
                 const sender = parts[0];
                 const fileUrl = parts[1];
 
