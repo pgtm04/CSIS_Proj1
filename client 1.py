@@ -48,6 +48,12 @@ def handle_print(data):
     print(data)
 
 
+@socketio.on('clear_history')
+def handle_clear_history():
+    room = sid_to_room.get(request.sid, 'default')
+    if room in room_histories:
+        room_histories[room] = []
+    emit('clear_chat', to=room)
 
 @socketio.on('register_device')
 def handle_register(data):

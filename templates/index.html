@@ -11,7 +11,7 @@
 <body>
 <div class = grid-container>
     <div class = "left-panel">
-    <h1 class="heading"> Hello!</h1>
+    <h1 class="heading" id = "h1"> Home</h1>
         <form class="chatForm" id="chatForm">
             <div class="messageTile">
             <label for="message">Message:</label>
@@ -97,6 +97,17 @@
                 localStorage.setItem("deviceId", deviceId);
             }
             socket.emit('join_room', { deviceId: deviceId, room: currentRoom});
+            if(currentRoom!=="default")
+            {
+                const container = document.getElementById('h1');
+                container.innerHTML = 'Home: '+ currentRoom;
+            }
+            else
+            {
+                const container = document.getElementById('h1');
+                container.innerHTML = 'Home';
+
+            }
             try {
                 const messages = await getMessages(currentRoom);
                 console.log(messages);
@@ -127,6 +138,7 @@
             }
             else{
                 document.getElementById('message').disabled = false;
+                document.getElementById('pasteBtn').disabled = false;
 
             }
         })
