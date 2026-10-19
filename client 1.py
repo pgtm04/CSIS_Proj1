@@ -34,13 +34,16 @@ def create_new():
 def handle_join_room(data):
     device_id = data.get('deviceId', 'Anonymous')
     room = data.get('room', 'default')
+    sid_to_device[request.sid] = device_id
+
     if room in room_histories:
-        sid_to_device[request.sid] = device_id
         sid_to_room[request.sid] = room
         join_room(room)
         print(room)
         emit('load_history', {'success': True, 'room': room, 'history': room_histories[room]}, to=request.sid)
     else:
+        sid_to_room[request.sid] = 'default'
+        join_room('default')
         emit('load_history', {'success': False}, to=request.sid)
 
 @socketio.on('print')

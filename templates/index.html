@@ -99,13 +99,11 @@
             socket.emit('join_room', { deviceId: deviceId, room: currentRoom});
             if(currentRoom!=="default")
             {
-                const container = document.getElementById('h1');
-                container.innerHTML = 'Home: '+ currentRoom;
+                document.getElementById('h1').innerHTML = 'Home: '+ currentRoom;
             }
             else
             {
-                const container = document.getElementById('h1');
-                container.innerHTML = 'Home';
+                document.getElementById('h1').innerHTML = 'Home';
 
             }
             try {
@@ -219,18 +217,43 @@
                 console.error("Failed to save message to IndexedDB:", err);
             }
         });
-        socket.on('load_history', async function (){
-            try {
-                const messages = await getMessages(currentRoom);
-                const container = document.getElementById('message-container');
-                container.innerHTML = '';
-                messages.forEach(message => {
-                    appendMessage(message.text);
-                })
-            } catch (err) {
-                console.error("Failed to load history:", err);
+        socket.on('load_history', async function (data){
+            if (data && data.success) {
+                    const container = document.getElementById('message-container');
+                    container.innerHTML = '';
+
+                    const db = await getDB();
+                    const transaction = db.transaction("messages", "readwrite");
+                    transaction.objectStore("messages").clear();
+
+                if (data.history && Array.isArray(data.history)) {
+                    for (const msg of data.history) {
+                        appendMessage(msg);
+                        await saveMessage({
+                            room: data.room,
+                            text: msg
+                        });
+                    }
+                }
+            } else {
+                localStorage.setItem("currentRoom", "default");
+                document.getElementById('h1').innerHTML = 'Home';
             }
         })
+        socket.on('clear_chat', async () => {
+            const container = document.getElementById('message-container');
+            if (container) {
+                container.innerHTML = '';
+            }
+            const db = await getDB();
+            const transaction = db.transaction("messages", "readwrite");
+            transaction.objectStore("messages").clear();
+        });
+        document.getElementById("clearBtn").addEventListener("click", (e) => {
+            e.preventDefault();
+            socket.emit('clear_history');
+        });
+
         function appendMessage(msg){
             const container = document.getElementById('message-container');
             const newP = document.createElement('p');
