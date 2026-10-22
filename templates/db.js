@@ -40,7 +40,6 @@ async function cleanupExpiredData(db, tableName) {
     const transaction = db.transaction(tableName,  "readwrite")
     const store = transaction.objectStore(tableName);
     const index = store.index("timeAdded")
-
     const range = IDBKeyRange.upperBound(Date.now()-(3600 * 1000*24))
     const request=  index.openCursor();
 

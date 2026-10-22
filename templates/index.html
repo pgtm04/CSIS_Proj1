@@ -106,18 +106,6 @@
                 document.getElementById('h1').innerHTML = 'Home';
 
             }
-            try {
-                const messages = await getMessages(currentRoom);
-                console.log(messages);
-                const container = document.getElementById('message-container');
-                container.innerHTML = '';
-
-                messages.forEach(message => {
-                    appendMessage(message.text);
-                });
-            } catch (err) {
-                console.error("Failed to load messages from IndexedDB:", err);
-            }
         });
         document.getElementById('message').addEventListener('input', function() {
             if(document.getElementById('message').value.trim().length>0) {
@@ -222,17 +210,17 @@
                     const container = document.getElementById('message-container');
                     container.innerHTML = '';
 
-                    const db = await getDB();
-                    const transaction = db.transaction("messages", "readwrite");
-                    transaction.objectStore("messages").clear();
-
                 if (data.history && Array.isArray(data.history)) {
-                    for (const msg of data.history) {
-                        appendMessage(msg);
-                        await saveMessage({
-                            room: data.room,
-                            text: msg
+                    data.history.forEach(msg => appendMessage(msg));
+                    try {
+                        const db = await getDB();
+                        const transaction = db.transaction("messages", "readwrite");
+                        transaction.objectStore("messages").clear();
+                        data.history.forEach(msg => {
+                            transaction.objectStore("messages").add({ room: data.room, text: msg });
                         });
+                    } catch (err) {
+                        console.error("Failed to sync IndexedDB:", err);
                     }
                 }
             } else {
