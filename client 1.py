@@ -2,6 +2,7 @@ import os
 from flask import Flask, render_template, request, url_for, send_from_directory, jsonify
 from flask_socketio import SocketIO, emit, join_room
 from werkzeug.utils import secure_filename
+import shutil
 
 app = Flask(__name__, static_url_path='', static_folder='.')
 socketio = SocketIO(app, cors_allowed_origins=["*"])
@@ -56,6 +57,18 @@ def handle_clear_history():
     room = sid_to_room.get(request.sid, 'default')
     if room in room_histories:
         room_histories[room] = []
+    upload_folder = app.config['UPLOAD_FOLDER']
+
+    if os.path.exists(upload_folder):
+        for filename in os.listdir(upload_folder):
+            file_path = os.path.join(upload_folder, filename)
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+            except Exception as e:
+                print(f"Failed to delete {file_path}. Reason: {e}")
     emit('clear_chat', to=room)
 
 @socketio.on('register_device')
