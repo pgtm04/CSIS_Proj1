@@ -117,7 +117,7 @@ def handle_upload_file(data):
     file_url = data.get('file_url')
     if not file_url:
         return
-    formatted_msg = f"{sid_to_device.get(request.sid, "Anonymous")}: {file_url}"
+    formatted_msg = f"{sid_to_device.get(request.sid, 'Anonymous')}: {file_url}"
     join_room(room)
     room_histories[room].append(formatted_msg)
 
