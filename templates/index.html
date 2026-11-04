@@ -12,7 +12,7 @@
 <body>
 <div class = grid-container>
     <div class = "left-panel">
-    <h1 class="heading" id = "h1"> Home</h1>
+    <h1 class="heading" id = "h1">Zync</h1>
         <form class="chatForm" id="chatForm">
             <div class="messageTile">
             <label for="message">Message:</label>
@@ -123,11 +123,11 @@
             socket.emit('join_room', { deviceId: deviceId, room: currentRoom});
             if(currentRoom!=="default")
             {
-                document.getElementById('h1').innerHTML = 'Home: '+ currentRoom;
+                document.getElementById('h1').innerHTML = 'Zync: '+ currentRoom;
             }
             else
             {
-                document.getElementById('h1').innerHTML = 'Home';
+                document.getElementById('h1').innerHTML = 'Zync';
 
             }
         });
@@ -251,9 +251,12 @@
             const container = document.getElementById('message-container');
             const newP = document.createElement('p');
             const parts = msg.split(': ');
-            if (parts.length > 1 && /^\/[^\s]+\.[a-zA-Z0-9]{2,4}$/.test(parts[1].trim())) {
+            const messageContent = parts.length > 1 ? parts.slice(1).join(': ') : msg;
+            const isFile = parts.length > 1 && /^\/[^\s]+\.[a-zA-Z0-9]{2,4}$/.test(messageContent.trim());
+
+            if (isFile) {
                 const sender = parts[0];
-                const fileUrl = parts[1];
+                const fileUrl = messageContent.trim();
 
                 newP.appendChild(document.createTextNode(`${sender}: `));
 
@@ -261,14 +264,55 @@
                 link.href = fileUrl;
                 link.textContent = "Open File";
                 link.target = "_blank";
+                link.rel = "noopener noreferrer";
 
                 newP.appendChild(link);
             } else {
-                newP.textContent = msg;
+                newP.appendChild(document.createTextNode(msg));
             }
-            container.appendChild(newP)
 
+            const copyButton = document.createElement('button');
+            copyButton.type = 'button';
+            copyButton.className = 'copy-message';
+            copyButton.textContent = 'Copy';
+            copyButton.setAttribute('aria-label', 'Copy message content');
+
+            copyButton.addEventListener('click', async () => {
+                const originalLabel = copyButton.textContent;
+                try {
+                    await navigator.clipboard.writeText(messageContent);
+                    copyButton.textContent = 'Copied!';
+                } catch (err) {
+                    // Fallback for browsers where the Clipboard API is unavailable.
+                    const temporaryInput = document.createElement('textarea');
+                    temporaryInput.value = messageContent;
+                    temporaryInput.style.position = 'fixed';
+                    temporaryInput.style.opacity = '0';
+                    document.body.appendChild(temporaryInput);
+                    temporaryInput.select();
+
+                    try {
+                        if (document.execCommand('copy')) {
+                            copyButton.textContent = 'Copied!';
+                        } else {
+                            copyButton.textContent = 'Copy failed';
+                        }
+                    } catch (copyError) {
+                        copyButton.textContent = 'Copy failed';
+                    }
+
+                    temporaryInput.remove();
+                }
+
+                setTimeout(() => {
+                    copyButton.textContent = originalLabel;
+                }, 1500);
+            });
+
+            newP.appendChild(copyButton);
+            container.appendChild(newP);
         }
+
         async function getMessages(room) {
             const db = await getDB();
 
