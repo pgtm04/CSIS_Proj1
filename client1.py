@@ -2,11 +2,13 @@ import os
 from flask import Flask, render_template, request, url_for, send_from_directory, jsonify
 from flask_socketio import SocketIO, emit, join_room
 from werkzeug.utils import secure_filename
-import shutil
+import uuid
+from urllib.parse import urlparse
 
 app = Flask(__name__, static_url_path='', static_folder='.')
 socketio = SocketIO(app, cors_allowed_origins=["*"])
 room_histories = {"default": []}
+room_files = {}
 sid_to_device = {}
 sid_to_room = {}
 app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'uploads')
@@ -57,18 +59,17 @@ def handle_clear_history():
     room = sid_to_room.get(request.sid, 'default')
     if room in room_histories:
         room_histories[room] = []
-    upload_folder = app.config['UPLOAD_FOLDER']
 
-    if os.path.exists(upload_folder):
-        for filename in os.listdir(upload_folder):
-            file_path = os.path.join(upload_folder, filename)
-            try:
-                if os.path.isfile(file_path) or os.path.islink(file_path):
-                    os.unlink(file_path)
-                elif os.path.isdir(file_path):
-                    shutil.rmtree(file_path)
-            except Exception as e:
-                print(f"Failed to delete {file_path}. Reason: {e}")
+    upload_folder = app.config['UPLOAD_FOLDER']
+    for filename in room_files.get(room, set()):
+        file_path = os.path.join(upload_folder, filename)
+        try:
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+        except Exception as e:
+            print(f"Failed to delete {file_path}. Reason: {e}")
+
+    room_files[room] = set()
     emit('clear_chat', to=room)
 
 @socketio.on('register_device')
@@ -102,7 +103,8 @@ def upload_file():
         return jsonify({'error': 'No selected file'}), 400
 
     if file:
-        filename = secure_filename(file.filename)
+        original_filename = secure_filename(file.filename)
+        filename = f"{uuid.uuid4().hex}_{original_filename}"
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(filepath)
 
@@ -118,6 +120,8 @@ def handle_upload_file(data):
     if not file_url:
         return
     formatted_msg = f"{sid_to_device.get(request.sid, 'Anonymous')}: {file_url}"
+    filename = os.path.basename(urlparse(file_url).path)
+    room_files.setdefault(room, set()).add(filename)
     join_room(room)
     room_histories[room].append(formatted_msg)
 
