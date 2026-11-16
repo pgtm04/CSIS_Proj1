@@ -5,17 +5,25 @@ Zync is a web-based clipboard and file-sharing app that lets you transfer text a
 ## Features
 
 Real-time sharing: Send text and files between connected devices.
+
 Rooms: Create separate workspaces with access codes.
+
 File sharing: Upload and download files.
+
 Clipboard sharing: Quickly send and copy text across devices.
+
 Chat history: View previous messages and shared content.
+
 Local storage: Preserve chat history and device information locally.
 
 ## Tech
 
 Backend: Python, Flask, Flask-SocketIO
+
 Frontend: HTML, CSS, JavaScript
+
 Storage: IndexedDB, LocalStorage
+
 Communication: WebSockets
 
 ## Getting Started
